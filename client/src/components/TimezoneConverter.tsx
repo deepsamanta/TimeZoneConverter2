@@ -95,6 +95,7 @@ export default function TimezoneConverter() {
   // Form submission
   const onSubmit = async (formData: FormValues) => {
     try {
+      console.log("Converting with form data:", formData);
       const istTimezone = "Asia/Kolkata";
       let sourceTimezone, targetTimezone;
 
@@ -105,6 +106,11 @@ export default function TimezoneConverter() {
         sourceTimezone = istTimezone;
         targetTimezone = formData.targetTimezone;
       }
+
+      console.log("Source timezone:", sourceTimezone);
+      console.log("Target timezone:", targetTimezone);
+      console.log("Date:", formData.date);
+      console.log("Time:", formData.time);
 
       // Convert time
       const result = convertTime(

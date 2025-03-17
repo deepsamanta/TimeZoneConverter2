@@ -15,17 +15,25 @@ export function convertTime(
   time: string
 ): { sourceTime: string; targetTime: string; targetDate: string; difference: string } {
   try {
+    console.log('convertTime called with:', { sourceTimezone, targetTimezone, date, time });
+    
     // Combine date and time
     const dateTimeString = `${date}T${time}:00`;
+    console.log('dateTimeString:', dateTimeString);
     
     // Parse the input date as if it were in the source timezone
     const sourceDateObj = new Date(dateTimeString);
+    console.log('sourceDateObj:', sourceDateObj);
     
     // Convert it to a zoned time in the source timezone
+    console.log('Converting to source timezone:', sourceTimezone);
     const sourceZonedDate = toZonedTime(sourceDateObj, sourceTimezone);
+    console.log('sourceZonedDate:', sourceZonedDate);
     
     // Get the target timezone date
+    console.log('Converting to target timezone:', targetTimezone);
     const targetDate = toZonedTime(sourceDateObj, targetTimezone);
+    console.log('targetDate:', targetDate);
     
     // Format the results
     const sourceTime = format(sourceZonedDate, 'h:mm a');
@@ -35,15 +43,18 @@ export function convertTime(
     // Calculate difference
     const difference = formatTimeDifference(sourceZonedDate, targetDate);
     
-    return {
+    const result = {
       sourceTime,
       targetTime,
       targetDate: targetDateStr,
       difference
     };
+    
+    console.log('Conversion result:', result);
+    return result;
   } catch (error) {
     console.error('Error converting time:', error);
-    throw new Error('Failed to convert time between timezones');
+    throw new Error(`Failed to convert time between timezones: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
