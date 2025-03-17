@@ -1,5 +1,5 @@
 import { format, formatISO, parseISO, formatDistance } from 'date-fns';
-import { fromZonedTime, toZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 
 export interface Timezone {
   value: string;
@@ -18,19 +18,22 @@ export function convertTime(
     // Combine date and time
     const dateTimeString = `${date}T${time}:00`;
     
-    // Convert from source timezone to UTC
-    const utcDate = fromZonedTime(dateTimeString, sourceTimezone);
+    // Parse the input date as if it were in the source timezone
+    const sourceDateObj = new Date(dateTimeString);
     
-    // Convert from UTC to target timezone
-    const targetDate = toZonedTime(utcDate, targetTimezone);
+    // Convert it to a zoned time in the source timezone
+    const sourceZonedDate = toZonedTime(sourceDateObj, sourceTimezone);
+    
+    // Get the target timezone date
+    const targetDate = toZonedTime(sourceDateObj, targetTimezone);
     
     // Format the results
-    const sourceTime = format(toZonedTime(utcDate, sourceTimezone), 'h:mm a');
+    const sourceTime = format(sourceZonedDate, 'h:mm a');
     const targetTime = format(targetDate, 'h:mm a');
     const targetDateStr = format(targetDate, 'MMMM d, yyyy');
     
     // Calculate difference
-    const difference = formatTimeDifference(utcDate, targetDate);
+    const difference = formatTimeDifference(sourceZonedDate, targetDate);
     
     return {
       sourceTime,
