@@ -11,6 +11,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const timezones = [
       { value: "Asia/Kolkata", label: "New Delhi (IST)", offset: "+5:30" },
       { value: "America/New_York", label: "New York (EDT/EST)", offset: "-4:00" },
+      { value: "EST", label: "Eastern Standard Time (EST)", offset: "-5:00" },
+      { value: "EDT", label: "Eastern Daylight Time (EDT)", offset: "-4:00" },
       { value: "Europe/London", label: "London (BST/GMT)", offset: "+1:00" },
       { value: "Europe/Paris", label: "Paris (CEST/CET)", offset: "+2:00" },
       { value: "Asia/Tokyo", label: "Tokyo (JST)", offset: "+9:00" },
