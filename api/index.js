@@ -1,40 +1,23 @@
-// Root API handler for Vercel - API Documentation and Health Check
-export default function handler(req, res) {
-  // Enable CORS
+// Root API handler for Vercel
+import express from 'express';
+import { registerRoutes } from '../server/routes';
+
+const app = express();
+app.use(express.json());
+
+// Enable CORS - Using CORS logic from original code, but expanding allowed methods
+app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT'); // Expanded allowed methods
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
-  
-  // Handle OPTIONS request for CORS preflight
+
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  next();
+});
 
-  // Add server timestamp for health checks
-  const serverTime = new Date().toISOString();
-  
-  // Return API information
-  return res.status(200).json({
-    name: 'Timezone Converter API',
-    version: '1.0.0',
-    status: 'operational',
-    serverTime,
-    environment: process.env.NODE_ENV || 'development',
-    endpoints: [
-      { path: '/api/timezones', methods: ['GET'], description: 'Get list of supported timezones' },
-      { path: '/api/favorites', methods: ['GET', 'POST', 'DELETE'], description: 'Manage favorite timezone conversions' },
-      { path: '/api/conversions', methods: ['GET', 'POST', 'DELETE'], description: 'Manage conversion history' }
-    ],
-    documentation: {
-      description: 'This API provides timezone conversion services with persistent storage for favorites and conversion history',
-      author: 'Timezone Converter Team',
-      lastUpdated: '2025-03-18'
-    }
-  });
-}
+registerRoutes(app);
+
+export default app;
