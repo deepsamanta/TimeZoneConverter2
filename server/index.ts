@@ -63,7 +63,11 @@ const initializeServer = async () => {
 
   // Add catch-all route for SPA
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/public/index.html'));
+    if (req.path.startsWith('/api')) {
+      res.status(404).json({ message: 'API endpoint not found' });
+    } else {
+      res.sendFile('index.html', { root: './dist/public' });
+    }
   });
 
   return { app, server };
