@@ -30,32 +30,20 @@ apiFiles.forEach(file => {
   fs.copyFileSync(src, dest);
 });
 
-// Create a proper index.js for Vercel
-console.log('Creating entry point for Vercel...');
+// Create a simple index.js for Vercel that serves the static site
+console.log('Creating minimal entry point for Vercel...');
 fs.writeFileSync('dist/index.js', `
-// This file routes all requests to the Vite client bundle
-// No server-side code is executed here for security
-import { createServer } from 'http';
-import { join } from 'path';
-import { readFileSync } from 'fs';
+// This is a minimal server file for Vercel deployment
+// It's only used during local preview, as Vercel uses its own routing
 
-const PORT = process.env.PORT || 3000;
-const indexHTML = readFileSync(join(__dirname, 'index.html'), 'utf-8');
-
-createServer((req, res) => {
-  // API requests are handled by Vercel serverless functions
-  if (req.url.startsWith('/api/')) {
-    res.statusCode = 404;
-    res.end('API endpoints are handled by Vercel Functions');
-    return;
-  }
-
-  // Serve the index.html for all other requests (SPA routing)
-  res.setHeader('Content-Type', 'text/html');
-  res.end(indexHTML);
-}).listen(PORT, () => {
-  console.log(\`Server running on port \${PORT}\`);
-});
+// In Vercel deployments, this file is not actually used for routing
+// Instead, Vercel uses the configuration in vercel.json
+// This file just satisfies Vercel's requirement for an entry point
+export default function handler(req, res) {
+  // This function should never be called in production
+  // as Vercel will handle routing via vercel.json configuration
+  res.status(200).end('Timezone Converter is running!');
+}
 `);
 
 console.log('Build completed successfully!');
