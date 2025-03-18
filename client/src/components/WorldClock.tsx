@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTimezones } from "@/hooks/useTimezones";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getCurrentTime, formatTimeDifference } from "@/utils/timezone";
+import { getCurrentTime, formatTimeDifference, getFormattedOffset } from "@/utils/timezone";
 
 interface ClockData {
   timezone: string;
@@ -58,10 +58,13 @@ export default function WorldClock() {
       
       const difference = formatTimeDifference(istDate, localDate);
       
+      // Get the formatted offset string
+      const formattedOffset = getFormattedOffset(timezone);
+      
       return {
         timezone,
         name: tzInfo?.label.split(' ')[0] || timezone,
-        offset: tzInfo?.offset || "",
+        offset: formattedOffset.replace('GMT', ''),
         time,
         date,
         difference,
