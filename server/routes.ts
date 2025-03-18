@@ -24,41 +24,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       { value: "Australia/Sydney", label: "Sydney (AEST/AEDT)" },
       { value: "Pacific/Auckland", label: "Auckland (NZST/NZDT)" }
     ];
-    
+
     // Calculate current offsets for each timezone
     const currentDate = new Date();
-    
+
     const timezones = timezoneDefinitions.map(tz => {
       // Calculate offset using current date to account for DST
       const localDate = new Date(currentDate);
-      
+
       try {
         // Calculate the UTC offset for this timezone
         // We're doing this on the server-side for consistency
         const timezoneDate = new Date(localDate.toLocaleString('en-US', { timeZone: tz.value }));
         const diffInMinutes = (timezoneDate.getTime() - localDate.getTime()) / (1000 * 60);
-        
+
         // Format the offset string
         const offsetHours = Math.floor(Math.abs(diffInMinutes) / 60);
         const offsetMinutes = Math.abs(diffInMinutes) % 60;
         const sign = diffInMinutes >= 0 ? '+' : '-';
-        
+
         const formattedOffset = `${sign}${offsetHours.toString().padStart(2, '0')}:${offsetMinutes.toString().padStart(2, '0')}`;
-        
+
         return {
           ...tz,
           offset: formattedOffset
         };
-      } catch (error) {
-        // If there's an error calculating the offset, use a default offset
-        console.error(`Error calculating offset for ${tz.value}:`, error);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`Error calculating offset for ${tz.value}:`, errorMessage);
         return {
           ...tz,
           offset: "+00:00" 
         };
       }
     });
-    
+
     res.json(timezones);
   });
 
@@ -92,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid ID format" });
       }
-      
+
       const success = await storage.deleteFavorite(id);
       if (success) {
         res.status(204).send();
