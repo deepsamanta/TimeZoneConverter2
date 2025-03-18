@@ -80,23 +80,19 @@ const initializeServer = async () => {
   return { app, server };
 };
 
-// Check if we're running in Vercel (serverless) or directly
+// Export for serverless and start server for deployment
+const serverPromise = initializeServer();
+
 if (process.env.VERCEL) {
-  // In Vercel, export the app for serverless handling
-  module.exports = initializeServer().then(({ app }) => app);
+  module.exports = serverPromise.then(({ app }) => app);
 } else {
-  // In development or standalone server, start the server
   (async () => {
-    const { server } = await initializeServer();
-    
-    // Start the server on port 5000
+    const { server } = await serverPromise;
     const port = process.env.PORT || 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
+    server.listen(port, "0.0.0.0", () => {
       log(`serving on port ${port}`);
     });
   })();
 }
+
+export default serverPromise.then(({ app }) => app);
