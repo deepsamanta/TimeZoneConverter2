@@ -52,15 +52,19 @@ const initializeServer = async () => {
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } 
-  // Skip static serving in Vercel environment
-  else if (!process.env.VERCEL) {
+  // Handle static serving for both Vercel and non-Vercel environments
+  else {
     try {
       serveStatic(app);
     } catch (error) {
       console.warn("Warning: Static file serving failed, but continuing anyway:", error);
-      // Continue execution even if static serving fails
     }
   }
+
+  // Add catch-all route for SPA
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/public/index.html'));
+  });
 
   return { app, server };
 };
