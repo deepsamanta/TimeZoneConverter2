@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertConversionSchema, insertFavoriteSchema } from "@shared/schema";
-import { parse, format } from "date-fns";
+import { format } from "date-fns";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {

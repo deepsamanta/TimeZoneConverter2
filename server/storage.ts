@@ -1,11 +1,8 @@
 import { 
-  users, 
   type User, 
   type InsertUser, 
-  favorites, 
   type Favorite, 
   type InsertFavorite,
-  conversions,
   type Conversion,
   type InsertConversion
 } from "@shared/schema";
