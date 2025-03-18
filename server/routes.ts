@@ -2,7 +2,6 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertConversionSchema, insertFavoriteSchema } from "@shared/schema";
-import { format } from "date-fns";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -49,7 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...tz,
           offset: formattedOffset
         };
-      } catch (error: unknown) {
+      } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`Error calculating offset for ${tz.value}:`, errorMessage);
         return {
