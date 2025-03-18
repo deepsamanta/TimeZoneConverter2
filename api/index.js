@@ -1,4 +1,4 @@
-// Root API handler for Vercel
+// Root API handler for Vercel - API Documentation and Health Check
 export default function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -15,15 +15,26 @@ export default function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Add server timestamp for health checks
+  const serverTime = new Date().toISOString();
   
   // Return API information
   return res.status(200).json({
     name: 'Timezone Converter API',
     version: '1.0.0',
+    status: 'operational',
+    serverTime,
+    environment: process.env.NODE_ENV || 'development',
     endpoints: [
       { path: '/api/timezones', methods: ['GET'], description: 'Get list of supported timezones' },
       { path: '/api/favorites', methods: ['GET', 'POST', 'DELETE'], description: 'Manage favorite timezone conversions' },
       { path: '/api/conversions', methods: ['GET', 'POST', 'DELETE'], description: 'Manage conversion history' }
-    ]
+    ],
+    documentation: {
+      description: 'This API provides timezone conversion services with persistent storage for favorites and conversion history',
+      author: 'Timezone Converter Team',
+      lastUpdated: '2025-03-18'
+    }
   });
 }
