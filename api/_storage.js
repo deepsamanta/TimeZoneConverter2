@@ -1,20 +1,39 @@
 // Shared storage for serverless functions
 // This acts as a simple in-memory database for Vercel serverless functions
 
+// Avoid depending on any server-side types to prevent bundling issues
+// Define simple self-contained type definitions here
+
+/**
+ * Standalone storage implementation for Vercel serverless functions
+ * This implementation avoids any imports from the main codebase
+ * to prevent code exposure in client bundles
+ */
 export class Storage {
+  // These properties are declared here to avoid TypeScript errors
+  favorites;
+  conversions;
+  nextFavoriteId;
+  nextConversionId;
+  
   constructor() {
-    // Only initialize if not already initialized (to maintain state between function calls)
-    this.favorites = global._favorites || [];
-    this.conversions = global._conversions || [];
-    this.nextFavoriteId = global._nextFavoriteId || 1;
-    this.nextConversionId = global._nextConversionId || 1;
+    // Use global for stateful storage in serverless environment
+    // This works because Vercel may reuse the same serverless instance for multiple invocations
+    if (!global._timezoneAppState) {
+      global._timezoneAppState = {
+        favorites: [],
+        conversions: [],
+        nextFavoriteId: 1,
+        nextConversionId: 1
+      };
+    }
     
-    // Store on the global object to persist between function invocations
-    // on the same serverless instance
-    global._favorites = this.favorites;
-    global._conversions = this.conversions;
-    global._nextFavoriteId = this.nextFavoriteId;
-    global._nextConversionId = this.nextConversionId;
+    // Cache references to global state
+    this.state = global._timezoneAppState;
+    this.favorites = this.state.favorites;
+    this.conversions = this.state.conversions;
+    this.nextFavoriteId = this.state.nextFavoriteId;
+    this.nextConversionId = this.state.nextConversionId;
   }
   
   // Favorite methods
@@ -25,7 +44,7 @@ export class Storage {
   }
   
   createFavorite(favoriteData) {
-    const id = global._nextFavoriteId++;
+    const id = this.state.nextFavoriteId++;
     const createdAt = new Date().toISOString();
     const newFavorite = { ...favoriteData, id, createdAt };
     
@@ -49,7 +68,7 @@ export class Storage {
   }
   
   createConversion(conversionData) {
-    const id = global._nextConversionId++;
+    const id = this.state.nextConversionId++;
     const createdAt = new Date().toISOString();
     const newConversion = { ...conversionData, id, createdAt };
     

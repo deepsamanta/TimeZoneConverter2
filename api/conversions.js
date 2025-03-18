@@ -1,6 +1,7 @@
 // API handler for conversions
 // Use in-memory storage for serverless functions with persistence
 import { Storage } from './_storage';
+import { parseRequestBody } from './_bodyParser';
 
 // Initialize storage outside handler to maintain state between invocations in the same instance
 const storage = new Storage();
@@ -27,12 +28,21 @@ export default async function handler(req, res) {
     
     // Handle POST request
     if (req.method === 'POST') {
+      // Parse request body if needed
+      const body = await parseRequestBody(req);
+      
+      if (!body.sourceTimezone || !body.targetTimezone || !body.sourceTime || !body.targetTime || !body.date) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: sourceTimezone, targetTimezone, sourceTime, targetTime, and date are required'
+        });
+      }
+      
       const newConversion = storage.createConversion({
-        sourceTimezone: req.body.sourceTimezone,
-        targetTimezone: req.body.targetTimezone,
-        sourceTime: req.body.sourceTime,
-        targetTime: req.body.targetTime,
-        date: req.body.date
+        sourceTimezone: body.sourceTimezone,
+        targetTimezone: body.targetTimezone,
+        sourceTime: body.sourceTime,
+        targetTime: body.targetTime,
+        date: body.date
       });
       
       return res.status(201).json(newConversion);
@@ -48,6 +58,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
     console.error('Error handling conversions:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ 
+      error: 'Internal server error', 
+      message: error.message || 'Unknown error'
+    });
   }
 }

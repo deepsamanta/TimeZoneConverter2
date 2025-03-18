@@ -1,6 +1,7 @@
 // API handler for favorites
 // Use in-memory storage for serverless functions with persistence
 import { Storage } from './_storage';
+import { parseRequestBody } from './_bodyParser';
 
 // Initialize storage outside handler to maintain state between invocations in the same instance
 const storage = new Storage();
@@ -26,10 +27,19 @@ export default async function handler(req, res) {
     
     // Handle POST request
     if (req.method === 'POST') {
+      // Parse request body if needed
+      const body = await parseRequestBody(req);
+      
+      if (!body.sourceTimezone || !body.targetTimezone || !body.name) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: sourceTimezone, targetTimezone, and name are required'
+        });
+      }
+      
       const newFavorite = storage.createFavorite({
-        sourceTimezone: req.body.sourceTimezone,
-        targetTimezone: req.body.targetTimezone,
-        name: req.body.name
+        sourceTimezone: body.sourceTimezone,
+        targetTimezone: body.targetTimezone,
+        name: body.name
       });
       
       return res.status(201).json(newFavorite);
@@ -54,6 +64,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
     console.error('Error handling favorites:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ 
+      error: 'Internal server error', 
+      message: error.message || 'Unknown error'
+    });
   }
 }
