@@ -2,14 +2,14 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/public",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "outputDirectory": "dist",
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
   "builds": [
-    { "src": "api/**/*.js", "use": "@vercel/node" },
-    { "src": "dist/public/**/*", "use": "@vercel/static" }
+    { "src": "api/**/*", "use": "@vercel/node" },
+    { "src": "dist/**/*", "use": "@vercel/static" }
   ],
   "headers": [
     {
