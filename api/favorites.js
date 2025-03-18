@@ -1,7 +1,9 @@
 // API handler for favorites
-// Use in-memory storage for serverless functions
-let favorites = [];
-let nextId = 1;
+// Use in-memory storage for serverless functions with persistence
+import { Storage } from './_storage';
+
+// Initialize storage outside handler to maintain state between invocations in the same instance
+const storage = new Storage();
 
 export default async function handler(req, res) {
   try {
@@ -18,20 +20,18 @@ export default async function handler(req, res) {
     
     // Handle GET request
     if (req.method === 'GET') {
+      const favorites = storage.getFavorites();
       return res.status(200).json(favorites);
     }
     
     // Handle POST request
     if (req.method === 'POST') {
-      const newFavorite = {
-        id: nextId++,
+      const newFavorite = storage.createFavorite({
         sourceTimezone: req.body.sourceTimezone,
         targetTimezone: req.body.targetTimezone,
-        name: req.body.name,
-        createdAt: new Date().toISOString()
-      };
+        name: req.body.name
+      });
       
-      favorites.push(newFavorite);
       return res.status(201).json(newFavorite);
     }
     
@@ -42,12 +42,11 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid ID' });
       }
       
-      const index = favorites.findIndex(f => f.id === id);
-      if (index === -1) {
+      const success = storage.deleteFavorite(id);
+      if (!success) {
         return res.status(404).json({ error: 'Favorite not found' });
       }
       
-      favorites.splice(index, 1);
       return res.status(200).json({ success: true });
     }
     

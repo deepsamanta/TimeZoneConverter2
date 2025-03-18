@@ -1,7 +1,9 @@
 // API handler for conversions
-// Use in-memory storage for serverless functions
-let conversions = [];
-let nextId = 1;
+// Use in-memory storage for serverless functions with persistence
+import { Storage } from './_storage';
+
+// Initialize storage outside handler to maintain state between invocations in the same instance
+const storage = new Storage();
 
 export default async function handler(req, res) {
   try {
@@ -19,36 +21,26 @@ export default async function handler(req, res) {
     // Handle GET request
     if (req.method === 'GET') {
       const limit = req.query.limit ? parseInt(req.query.limit) : 10;
-      const limitedConversions = limit ? conversions.slice(0, limit) : conversions;
-      return res.status(200).json(limitedConversions);
+      const conversions = storage.getConversions(limit);
+      return res.status(200).json(conversions);
     }
     
     // Handle POST request
     if (req.method === 'POST') {
-      const newConversion = {
-        id: nextId++,
+      const newConversion = storage.createConversion({
         sourceTimezone: req.body.sourceTimezone,
         targetTimezone: req.body.targetTimezone,
         sourceTime: req.body.sourceTime,
         targetTime: req.body.targetTime,
-        date: req.body.date,
-        createdAt: new Date().toISOString()
-      };
-      
-      // Add to the beginning of the array (for most recent first)
-      conversions.unshift(newConversion);
-      
-      // Keep only the latest 50 conversions
-      if (conversions.length > 50) {
-        conversions = conversions.slice(0, 50);
-      }
+        date: req.body.date
+      });
       
       return res.status(201).json(newConversion);
     }
     
     // Handle DELETE request (clear all conversions)
     if (req.method === 'DELETE') {
-      conversions = [];
+      storage.clearConversions();
       return res.status(200).json({ success: true });
     }
     
